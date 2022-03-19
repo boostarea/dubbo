@@ -43,6 +43,7 @@ import java.util.concurrent.TimeUnit;
 public abstract class FailbackRegistry extends AbstractRegistry {
 
     // Scheduled executor service
+    // 默认5秒，五个失败集合
     private final ScheduledExecutorService retryExecutor = Executors.newScheduledThreadPool(1, new NamedThreadFactory("DubboRegistryFailedRetryTimer", true));
 
     // Timer for failure retry, regular check if there is a request for failure, and if there is, an unlimited retry

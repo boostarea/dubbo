@@ -62,6 +62,8 @@ public abstract class AbstractRegistry implements Registry {
     // Log output
     protected final Logger logger = LoggerFactory.getLogger(getClass());
     // Local disk cache, where the special key value.registies records the list of registry centers, and the others are the list of notified service providers
+    // 所有提供者的URL，以URL#serviceKey作为key，提供者列表、路由规则、配置规则作为列表，空格隔开
+    // 还有一个特殊的key.registies,保存所有的注册中心的地址，注册中心无法连接或宕机，则Dubbo框架会自动通过本地缓存加载Invokerso
     private final Properties properties = new Properties();
     // File cache timing writing
     private final ExecutorService registryCacheExecutor = Executors.newFixedThreadPool(1, new NamedThreadFactory("DubboSaveRegistryCache", true));
@@ -70,6 +72,7 @@ public abstract class AbstractRegistry implements Registry {
     private final AtomicLong lastCacheChanged = new AtomicLong();
     private final Set<URL> registered = new ConcurrentHashSet<URL>();
     private final ConcurrentMap<URL, Set<NotifyListener>> subscribed = new ConcurrentHashMap<URL, Set<NotifyListener>>();
+    // 服务缓存对象，消费者URL
     private final ConcurrentMap<URL, Map<String, List<URL>>> notified = new ConcurrentHashMap<URL, Map<String, List<URL>>>();
     private URL registryUrl;
     // Local disk cache file
@@ -194,6 +197,7 @@ public abstract class AbstractRegistry implements Registry {
         if (file != null && file.exists()) {
             InputStream in = null;
             try {
+                // 从本地磁盘文件，将注册数据读到Properties中
                 in = new FileInputStream(file);
                 properties.load(in);
                 if (logger.isInfoEnabled()) {
@@ -435,9 +439,11 @@ public abstract class AbstractRegistry implements Registry {
             }
             properties.setProperty(url.getServiceKey(), buf.toString());
             long version = lastCacheChanged.incrementAndGet();
+            // 默认异步
             if (syncSaveFile) {
                 doSaveProperties(version);
             } else {
+                // AtomicLong的版本号，保证数据的最新性
                 registryCacheExecutor.execute(new SaveProperties(version));
             }
         } catch (Throwable t) {
