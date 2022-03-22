@@ -43,6 +43,7 @@ public class AdaptiveCompiler implements Compiler {
         } else {
             compiler = loader.getDefaultExtension();
         }
+        // 通过ExtensionLoader获取实现
         return compiler.compile(code, classLoader);
     }
 

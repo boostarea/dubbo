@@ -22,7 +22,6 @@ import com.alibaba.dubbo.common.logger.LoggerFactory;
 import com.alibaba.dubbo.common.utils.ConcurrentHashSet;
 import com.alibaba.dubbo.config.DubboShutdownHook;
 import com.alibaba.dubbo.config.spring.util.BeanFactoryUtils;
-
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
@@ -38,6 +37,7 @@ import java.util.Set;
 public class SpringExtensionFactory implements ExtensionFactory {
     private static final Logger logger = LoggerFactory.getLogger(SpringExtensionFactory.class);
 
+    // Spring上下文
     private static final Set<ApplicationContext> contexts = new ConcurrentHashSet<ApplicationContext>();
 
     private static final ApplicationListener shutdownHookListener = new ShutdownHookListener();
@@ -63,6 +63,7 @@ public class SpringExtensionFactory implements ExtensionFactory {
     @Override
     @SuppressWarnings("unchecked")
     public <T> T getExtension(Class<T> type, String name) {
+        // 先按名称，后按类型
         for (ApplicationContext context : contexts) {
             if (context.containsBean(name)) {
                 Object bean = context.getBean(name);
