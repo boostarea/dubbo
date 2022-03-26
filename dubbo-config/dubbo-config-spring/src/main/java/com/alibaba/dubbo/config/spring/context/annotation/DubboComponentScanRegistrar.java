@@ -20,7 +20,6 @@ import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.dubbo.config.spring.beans.factory.annotation.ReferenceAnnotationBeanPostProcessor;
 import com.alibaba.dubbo.config.spring.beans.factory.annotation.ServiceAnnotationBeanPostProcessor;
 import com.alibaba.dubbo.config.spring.util.BeanRegistrar;
-
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
@@ -49,13 +48,14 @@ import static org.springframework.beans.factory.support.BeanDefinitionBuilder.ro
  * @see ReferenceAnnotationBeanPostProcessor
  * @since 2.5.7
  */
+// 激活处理服务、消费注解
 public class DubboComponentScanRegistrar implements ImportBeanDefinitionRegistrar {
 
     @Override
     public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
 
         Set<String> packagesToScan = getPackagesToScan(importingClassMetadata);
-
+        // 服务注解逻辑
         registerServiceAnnotationBeanPostProcessor(packagesToScan, registry);
 
         registerReferenceAnnotationBeanPostProcessor(registry);

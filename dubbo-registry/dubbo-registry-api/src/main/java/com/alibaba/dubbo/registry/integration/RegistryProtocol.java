@@ -47,13 +47,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static com.alibaba.dubbo.common.Constants.ACCEPT_FOREIGN_IP;
-import static com.alibaba.dubbo.common.Constants.QOS_ENABLE;
-import static com.alibaba.dubbo.common.Constants.QOS_PORT;
-import static com.alibaba.dubbo.common.Constants.VALIDATION_KEY;
-import static com.alibaba.dubbo.common.Constants.CATEGORY_KEY;
-import static com.alibaba.dubbo.common.Constants.CONSUMERS_CATEGORY;
-import static com.alibaba.dubbo.common.Constants.CHECK_KEY;
+import static com.alibaba.dubbo.common.Constants.*;
 
 /**
  * RegistryProtocol
@@ -132,12 +126,14 @@ public class RegistryProtocol implements Protocol {
     @Override
     public <T> Exporter<T> export(final Invoker<T> originInvoker) throws RpcException {
         //export invoker
+        // 打开端口，服务实例存储到map
         final ExporterChangeableWrapper<T> exporter = doLocalExport(originInvoker);
 
         URL registryUrl = getRegistryUrl(originInvoker);
 
         //registry provider
         final Registry registry = getRegistry(originInvoker);
+        // 注册中心实例
         final URL registeredProviderUrl = getRegisteredProviderUrl(originInvoker);
 
         //to judge to delay publish whether or not
@@ -146,6 +142,7 @@ public class RegistryProtocol implements Protocol {
         ProviderConsumerRegTable.registerProvider(originInvoker, registryUrl, registeredProviderUrl);
 
         if (register) {
+            // 注册服务元数据
             register(registryUrl, registeredProviderUrl);
             ProviderConsumerRegTable.getProviderWrapper(originInvoker).setReg(true);
         }
@@ -155,6 +152,7 @@ public class RegistryProtocol implements Protocol {
         final URL overrideSubscribeUrl = getSubscribedOverrideUrl(registeredProviderUrl);
         final OverrideListener overrideSubscribeListener = new OverrideListener(overrideSubscribeUrl, originInvoker);
         overrideListeners.put(overrideSubscribeUrl, overrideSubscribeListener);
+        // 监听服务接口下configurators，用于处理动态配置
         registry.subscribe(overrideSubscribeUrl, overrideSubscribeListener);
         //Ensure that a new exporter instance is returned every time export
         return new DestroyableExporter<T>(exporter, originInvoker, overrideSubscribeUrl, registeredProviderUrl);
@@ -515,6 +513,7 @@ public class RegistryProtocol implements Protocol {
                             logger.info("Waiting " + timeout + "ms for registry to notify all consumers before unexport. Usually, this is called when you use dubbo API");
                             Thread.sleep(timeout);
                         }
+                        // 销毁时，注销端口和map中服务实例
                         exporter.unexport();
                     } catch (Throwable t) {
                         logger.warn(t.getMessage(), t);

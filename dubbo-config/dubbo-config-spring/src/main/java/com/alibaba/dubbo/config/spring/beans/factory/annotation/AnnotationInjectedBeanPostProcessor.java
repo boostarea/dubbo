@@ -122,7 +122,7 @@ public abstract class AnnotationInjectedBeanPostProcessor<A extends Annotation> 
     @Override
     public PropertyValues postProcessPropertyValues(
             PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName) throws BeanCreationException {
-
+        // 查找@Reference标注字段和方法
         InjectionMetadata metadata = findInjectionMetadata(beanName, bean.getClass(), pvs);
         try {
             metadata.inject(bean, beanName, pvs);

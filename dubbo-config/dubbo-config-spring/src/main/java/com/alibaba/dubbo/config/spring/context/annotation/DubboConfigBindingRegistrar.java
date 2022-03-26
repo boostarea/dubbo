@@ -118,7 +118,7 @@ public class DubboConfigBindingRegistrar implements ImportBeanDefinitionRegistra
         BeanDefinitionBuilder builder = rootBeanDefinition(configClass);
 
         AbstractBeanDefinition beanDefinition = builder.getBeanDefinition();
-
+// 注册到Spring容器
         registry.registerBeanDefinition(beanName, beanDefinition);
 
         if (log.isInfoEnabled()) {
